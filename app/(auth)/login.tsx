@@ -74,6 +74,7 @@ export default function LoginScreen() {
               onPress={handleLogin}
               loading={loading}
               disabled={loading}
+              variant="danger"
             />
 
             <View style={styles.signupContainer}>

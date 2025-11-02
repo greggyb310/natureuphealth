@@ -3,17 +3,28 @@ import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-nat
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
   disabled?: boolean;
   loading?: boolean;
 }
 
 export function Button({ title, onPress, variant = 'primary', disabled = false, loading = false }: ButtonProps) {
+  const getButtonStyle = () => {
+    if (variant === 'primary') return styles.primaryButton;
+    if (variant === 'danger') return styles.dangerButton;
+    return styles.secondaryButton;
+  };
+
+  const getActivityIndicatorColor = () => {
+    if (variant === 'secondary') return '#4A7C2E';
+    return '#FFFFFF';
+  };
+
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        variant === 'primary' ? styles.primaryButton : styles.secondaryButton,
+        getButtonStyle(),
         (disabled || loading) && styles.disabledButton,
       ]}
       onPress={onPress}
@@ -21,7 +32,7 @@ export function Button({ title, onPress, variant = 'primary', disabled = false, 
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#4A7C2E'} />
+        <ActivityIndicator color={getActivityIndicatorColor()} />
       ) : (
         <Text style={[styles.buttonText, variant === 'secondary' && styles.secondaryButtonText]}>
           {title}
@@ -47,6 +58,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 2,
     borderColor: '#4A7C2E',
+  },
+  dangerButton: {
+    backgroundColor: '#DC2626',
   },
   disabledButton: {
     opacity: 0.5,
