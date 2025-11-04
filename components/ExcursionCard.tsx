@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MapPin, Clock, TrendingUp } from 'lucide-react-native';
+import { MapPin, Clock, Heart } from 'lucide-react-native';
 import { colors } from '@/lib/colors';
 
 interface ExcursionCardProps {
@@ -8,7 +8,9 @@ interface ExcursionCardProps {
   duration: string;
   distance?: string;
   difficulty?: string;
+  isFavorite?: boolean;
   onPress?: () => void;
+  onFavoriteToggle?: () => void;
 }
 
 export function ExcursionCard({
@@ -17,7 +19,9 @@ export function ExcursionCard({
   duration,
   distance,
   difficulty,
+  isFavorite = false,
   onPress,
+  onFavoriteToggle,
 }: ExcursionCardProps) {
   return (
     <TouchableOpacity
@@ -27,11 +31,29 @@ export function ExcursionCard({
     >
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        {difficulty && (
-          <View style={[styles.badge, getDifficultyColor(difficulty)]}>
-            <Text style={styles.badgeText}>{difficulty}</Text>
-          </View>
-        )}
+        <View style={styles.headerRight}>
+          {difficulty && (
+            <View style={[styles.badge, getDifficultyColor(difficulty)]}>
+              <Text style={styles.badgeText}>{difficulty}</Text>
+            </View>
+          )}
+          {onFavoriteToggle && (
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                onFavoriteToggle();
+              }}
+              style={styles.favoriteButton}
+              activeOpacity={0.7}
+            >
+              <Heart
+                size={20}
+                color={isFavorite ? colors.primary : colors.text.secondary}
+                fill={isFavorite ? colors.primary : 'transparent'}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <Text style={styles.description} numberOfLines={2}>
@@ -85,6 +107,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 8,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   title: {
     fontSize: 18,
     fontWeight: '700',
@@ -96,6 +123,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 12,
+  },
+  favoriteButton: {
+    padding: 4,
   },
   badgeText: {
     fontSize: 12,

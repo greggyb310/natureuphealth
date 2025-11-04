@@ -290,10 +290,44 @@ Deno.serve(async (req: Request) => {
 
     if (assistantMsgError) throw assistantMsgError;
 
+    let excursionData = null;
+    const excursionMatch = assistantResponse.match(/```json\n([\s\S]*?)\n```/);
+
+    if (excursionMatch) {
+      try {
+        const parsedExcursion = JSON.parse(excursionMatch[1]);
+
+        if (parsedExcursion.title && parsedExcursion.location) {
+          const { data: newExcursion, error: excursionError } = await supabase
+            .from("excursions")
+            .insert({
+              user_id: user.id,
+              title: parsedExcursion.title,
+              description: parsedExcursion.description || null,
+              location: parsedExcursion.location,
+              route_data: parsedExcursion.route_data || null,
+              duration_minutes: parsedExcursion.duration_minutes || null,
+              difficulty_level: parsedExcursion.difficulty_level || "Easy",
+              activities: parsedExcursion.activities || [],
+              weather_conditions: parsedExcursion.weather_conditions || null,
+            })
+            .select()
+            .single();
+
+          if (!excursionError) {
+            excursionData = newExcursion;
+          }
+        }
+      } catch (parseError) {
+        console.error("Error parsing excursion data:", parseError);
+      }
+    }
+
     const responseData: ExcursionResponse = {
       response: assistantResponse,
       conversationId: dbConversationId,
       threadId: threadId,
+      excursionData,
     };
 
     return new Response(JSON.stringify(responseData), {
